@@ -1,6 +1,6 @@
 local State = {}
 
-State.VERSION = "1.0.0"
+State.VERSION = "1.0.1"
 State.NULL = setmetatable({}, { __tostring = function() return "null" end })
 State.ENV = "OTHER"
 State.GLOBAL_1, State.GLOBAL_2, State.GLOBAL_3 = {}, {}, {}
