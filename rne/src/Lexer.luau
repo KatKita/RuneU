@@ -11,7 +11,7 @@ Lexer.KEYWORDS = KEYWORDS
 
 function Lexer.lex(src)
 	local tokens = {}
-	local i, n = 1, #src
+	local i, n = 1, #src -- Ignore this RobloxStudio warning here
 	local function push(t, v) table.insert(tokens, { type = t, value = v }) end
 	while i <= n do
 		local c = src:sub(i, i)
