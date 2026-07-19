@@ -7,6 +7,9 @@ local Interpreter = require(src.Interpreter)
 local RuneFuncs = require(src.RuneFuncs)
 local RuneSandbox = require(src.RuneSandbox)
 
+-- Ignore this dev test module
+-- Interpreter = require(src.InterpreterV2)
+
 for name, fn in pairs(RuneFuncs) do
 	State.Builtins[name] = fn
 end
@@ -30,8 +33,8 @@ runeu.Run = function(code)
 	return tostring(ok) .. (err and (" " .. tostring(err)) or "")
 end
 
--- rnesandbox: routed through State.setEnv so environment changes can be
--- permanently locked via runeu.Sandbox.LockEnvironment().
+-- Uses State.setEnv so the environment can be locked
+-- with runeu.Sandbox.LockEnvironment().
 runeu.SetEnv = function(env)
 	State.setEnv(env)
 end
@@ -51,7 +54,7 @@ runeu.RegisterLibrary = function(name, tbl)
 end
 
 local function loadLibraries()
-	if script == nil then return end
+	if script == nil then warn("runeu: loadLibraries called outside of a script") return end
 	local libraries = script.Parent and script.Parent:FindFirstChild("libraries")
 	if not libraries then return end
 	for _, child in ipairs(libraries:GetChildren()) do
@@ -64,10 +67,8 @@ end
 
 loadLibraries()
 
--- rnesandbox: protect every builtin function and default library out of the
--- box. Call runeu.Sandbox.ProtectAll() again after RegisterFunction /
--- RegisterLibrary calls of your own if you want those protected too, or
--- runeu.Sandbox.Unprotect(name) to deliberately allow scripts to override one.
+-- Protect builtins and default libraries.
+-- Call ProtectAll() again after registering new ones if needed.
 RuneSandbox.ProtectAll()
 
 return runeu
