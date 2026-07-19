@@ -5,17 +5,19 @@ local Lexer = require(src.Lexer)
 local Parser = require(src.Parser)
 local Interpreter = require(src.Interpreter)
 local RuneFuncs = require(src.RuneFuncs)
+local RuneSandbox = require(src.RuneSandbox)
 
 for name, fn in pairs(RuneFuncs) do
 	State.Builtins[name] = fn
 end
 
-local rune = {}
+local runeu = {}
 
-rune.NULL = State.NULL
-rune.VERSION = State.VERSION
+runeu.NULL = State.NULL
+runeu.VERSION = State.VERSION
+runeu.Sandbox = RuneSandbox
 
-rune.Run = function(code)
+runeu.Run = function(code)
 	if type(code) ~= "string" then return end
 	local ok, err = pcall(function()
 		local tokens = Lexer.lex(code)
@@ -23,25 +25,27 @@ rune.Run = function(code)
 		Interpreter.execBlockStmts(stmts, State.getGlobalScope())
 	end)
 	if not ok then
-		warn("rune runtime error:", err)
+		warn("runeu runtime error:", err)
 	end
 	return tostring(ok) .. (err and (" " .. tostring(err)) or "")
 end
 
-rune.SetEnv = function(env)
-	State.ENV = env
+-- rnesandbox: routed through State.setEnv so environment changes can be
+-- permanently locked via runeu.Sandbox.LockEnvironment().
+runeu.SetEnv = function(env)
+	State.setEnv(env)
 end
 
-rune.GetGlobalTable = function()
+runeu.GetGlobalTable = function()
 	return State.ENV == "SERVER" and State.GLOBAL_1 or State.ENV == "CLIENT" and State.GLOBAL_2 or State.GLOBAL_3
 end
 
-rune.RegisterFunction = function(name, fn)
+runeu.RegisterFunction = function(name, fn)
 	if type(name) ~= "string" or type(fn) ~= "function" then return end
 	State.Builtins[name] = fn
 end
 
-rune.RegisterLibrary = function(name, tbl)
+runeu.RegisterLibrary = function(name, tbl)
 	if type(name) ~= "string" or type(tbl) ~= "table" then return end
 	State.Libraries[name] = tbl
 end
@@ -52,7 +56,7 @@ local function loadLibraries()
 	if not libraries then return end
 	for _, child in ipairs(libraries:GetChildren()) do
 		if child:IsA("ModuleScript") then
-			local ok, err = pcall(function() require(child)(rune) end)
+			local ok, err = pcall(function() require(child)(runeu) end)
 			if not ok then warn(child.Name .. " provider load error:", err) end
 		end
 	end
@@ -60,4 +64,10 @@ end
 
 loadLibraries()
 
-return rune
+-- rnesandbox: protect every builtin function and default library out of the
+-- box. Call runeu.Sandbox.ProtectAll() again after RegisterFunction /
+-- RegisterLibrary calls of your own if you want those protected too, or
+-- runeu.Sandbox.Unprotect(name) to deliberately allow scripts to override one.
+RuneSandbox.ProtectAll()
+
+return runeu
