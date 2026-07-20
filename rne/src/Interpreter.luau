@@ -99,18 +99,22 @@ execStmt = function(node, scope)
 		evalExpr(node.expr, scope)
 		return nil, nil
 	elseif kind == "Assign" then
-		local value = evalExpr(node.value, scope)
-		local target = node.target
-		if target.type == "Identifier" then
-			scopeSet(scope, target.name, value)
-		elseif target.type == "Index" then
-			local base = evalExpr(target.base, scope)
-			local key = evalExpr(target.key, scope)
-			local ok, err = pcall(function()
+		local values = {}
+		for i, expr in ipairs(node.values) do
+			values[i] = evalExpr(expr, scope)
+		end
+		for i, target in ipairs(node.targets) do
+			local value = values[i]
+			if value == nil then
+				value = State.NULL
+			end
+			if target.type == "Identifier" then
+				scopeSet(scope, target.name, value)
+
+			elseif target.type == "Index" then
+				local base = evalExpr(target.base, scope)
+				local key = evalExpr(target.key, scope)
 				base[key] = value
-			end)
-			if not ok then
-				error("runeu: " .. tostring(err))
 			end
 		end
 		return nil, nil
@@ -127,6 +131,17 @@ execStmt = function(node, scope)
 			if signal == "return" then return signal, value end
 			if signal == "break" then break end
 		end
+		return nil, nil
+	elseif kind == "Repeat" then
+		repeat
+			local signal, value = execBlockStmts(node.body, newScope(scope))
+			if signal == "return" then
+				return signal, value
+			end
+			if signal == "break" then
+				break
+			end
+		until State.toBool(evalExpr(node.cond, scope))
 		return nil, nil
 	elseif kind == "For" then
 		local startV = tonumber(evalExpr(node.startExpr, scope)) or 0
