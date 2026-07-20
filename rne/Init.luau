@@ -60,7 +60,7 @@ local function loadLibraries()
 	for _, child in ipairs(libraries:GetChildren()) do
 		if child:IsA("ModuleScript") then
 			local ok, err = pcall(function() require(child)(runeu) end)
-			if not ok then warn(child.Name .. " provider load error:", err) end
+			if not ok then warn(child.Name .. " library load error:", err) end
 		end
 	end
 end
