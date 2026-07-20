@@ -43,6 +43,9 @@ RuneFuncs.warn = builtinWarn
 RuneFuncs.createlibrary = builtinCreateLibrary
 RuneFuncs.getlibrary = builtinGetLibrary
 
+RuneFuncs.newlib = builtinCreateLibrary
+RuneFuncs.getlib = builtinGetLibrary
+
 --[[
 Rune.RuneFuncs.dolib = builtinCreateLibrary
 Rune.RuneFuncs.lib = builtinGetLibrary
@@ -67,6 +70,7 @@ RuneFuncs.each = ipairs
 RuneFuncs.spread = table.unpack
 RuneFuncs.assert = assert
 RuneFuncs.err = error
+RuneFuncs.error = error
 RuneFuncs.raweq = rawequal
 RuneFuncs.rawread = rawget
 RuneFuncs.rawwrite = rawset
