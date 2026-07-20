@@ -2,9 +2,8 @@ local Lexer = {}
 
 local KEYWORDS = {
 	["func"] = true, ["end"] = true, ["if"] = true, ["then"] = true, ["else"] = true, ["elseif"] = true,
-	["return"] = true, ["true"] = true, ["false"] = true, ["null"] = true,
-	["for"] = true, ["while"] = true, ["break"] = true, ["do"] = true,
-	["and"] = true, ["or"] = true, ["not"] = true,
+	["for"] = true, ["while"] = true, ["repeat"] = true, ["until"] = true, ["do"] = true, ["break"] = true, ["return"] = true, 
+	["true"] = true, ["false"] = true, ["null"] = true, ["and"] = true, ["or"] = true, ["not"] = true,
 }
 
 Lexer.KEYWORDS = KEYWORDS
