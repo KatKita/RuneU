@@ -60,7 +60,13 @@ end
 
 function State.getGlobalScope()
 	local vars = State.ENV == "SERVER" and State.GLOBAL_1 or State.ENV == "CLIENT" and State.GLOBAL_2 or State.GLOBAL_3
-	return { vars = vars, parent = nil, process = nil }
+
+	return {
+		vars = {},
+		parent = nil,
+		process = nil,
+		global = vars
+	}
 end
 
 ----------------------------------------------------------------------
