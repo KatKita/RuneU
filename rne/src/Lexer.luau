@@ -45,7 +45,7 @@ function Lexer.lex(src)
 		elseif c == "<" and src:sub(i + 1, i + 1) == "=" then push("OP", "<="); i = i + 2
 		elseif c == ">" and src:sub(i + 1, i + 1) == "=" then push("OP", ">="); i = i + 2
 		elseif c == "." and src:sub(i + 1, i + 1) == "." then push("OP", ".."); i = i + 2
-		elseif c:match("[%+%-%*/%%<>=%(%)%{%}%[%],%.#:]") then
+		elseif c:match("[%+%-%*/%%<>=%^%(%)%{%}%[%],%.#:]") then
 			push("OP", c)
 			i = i + 1
 		else
