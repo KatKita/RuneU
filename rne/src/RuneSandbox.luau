@@ -57,6 +57,37 @@ function RuneSandbox.IsEnvironmentLocked()
 	return State.Sandbox.envLocked
 end
 
+--[[ 
+Per-library member protection
+
+Lets you block a *specific* member of a library (e.g. "rbx.destroy",
+"rbx.setAttribute") instead of only whole-library / whole-global names
+Blocked members read as `null` and can't be called by RuneU scripts,
+even though the rest of the library stays usable
+]]
+
+-- rune.Sandbox.ProtectMember("rbx", "destroy")
+function RuneSandbox.ProtectMember(libName, memberName)
+	assert(type(libName) == "string" and type(memberName) == "string",
+		"rnesandbox: libName and memberName must be strings")
+	State.Sandbox.protectedMembers[libName .. "." .. memberName] = true
+end
+
+function RuneSandbox.UnprotectMember(libName, memberName)
+	State.Sandbox.protectedMembers[libName .. "." .. memberName] = nil
+end
+
+-- rune.Sandbox.ProtectMembers("rbx", { "destroy", "setAttribute" })
+function RuneSandbox.ProtectMembers(libName, memberNames)
+	for _, memberName in ipairs(memberNames) do
+		RuneSandbox.ProtectMember(libName, memberName)
+	end
+end
+
+function RuneSandbox.IsMemberProtected(libName, memberName)
+	return State.isMemberProtected(libName, memberName)
+end
+
 --[[
 function RuneSandbox.SetEnv(env)
 	assert(not State.Sandbox.envLocked, "rnesandbox: environment is locked")
