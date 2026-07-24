@@ -41,21 +41,21 @@ Sometimes you want to let users (or your own game systems) run scripts without g
 
 New here? Read these in order:
 
-1. **[Installation](Getting-Started/installation.md)** — install via the Roblox Studio command bar installer
-2. **[Quickstart](Getting-Started/quickstart.md)** — your first script, in under 5 minutes
-3. **[Language syntax](Language/syntax.md)** — variables, functions, control flow, tables, operators
-4. **[Built-in functions](Language/functions.md)** — `print`, `try`, `wait`, task spawning, and more
-5. **[Libraries](Libraries/overview.md)** — `math`, `string`, `table`, and `rbx` (Roblox API)
-6. **[Context](Advanced/context.md)** — passing data into a running script
-7. **[Processes & execution](Advanced/processes.md)** — sync vs async, stopping scripts, server/client environments
-8. **[Sandbox & permissions](Advanced/sandbox.md)** — protecting globals and library members from being overwritten
-9. **[Extending RuneU](Advanced/extending.md)** — registering your own functions and libraries
+1. **[Installation](docs/Getting-Started/installation.md)** — install via the Roblox Studio command bar installer
+2. **[Quickstart](docs/Getting-Started/quickstart.md)** — your first script, in under 5 minutes
+3. **[Language syntax](docs/Language/syntax.md)** — variables, functions, control flow, tables, operators
+4. **[Built-in functions](docs/Language/functions.md)** — `print`, `try`, `wait`, task spawning, and more
+5. **[Libraries](docs/Libraries/overview.md)** — `math`, `string`, `table`, and `rbx` (Roblox API)
+6. **[Context](docs/Advanced/context.md)** — passing data into a running script
+7. **[Processes & execution](docs/Advanced/processes.md)** — sync vs async, stopping scripts, server/client environments
+8. **[Sandbox & permissions](docs/Advanced/sandbox.md)** — protecting globals and library members from being overwritten
+9. **[Extending RuneU](docs/Advanced/extending.md)** — registering your own functions and libraries
 
 Looking for something specific instead? See the **[full API reference](API.md)**.
 
 ## Installation
 
-See [Getting Started/installation.md](Getting-Started/installation.md) for the full guide. Short version: enable HTTP requests in Studio, run the installer script from the Command Bar, and it downloads the `rne` folder from GitHub straight into `ReplicatedStorage`.
+See [docs/Getting Started/installation.md](docs/Getting-Started/installation.md) for the full guide. Short version: enable HTTP requests in Studio, run the installer script from the Command Bar, and it downloads the `rne` folder from GitHub straight into `ReplicatedStorage`.
 
 ## License
 
