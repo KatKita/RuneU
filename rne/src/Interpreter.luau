@@ -104,9 +104,21 @@ callFunction = function(fn, args, scope)
 		for i, pname in ipairs(fn.params) do
 			fnScope.vars[pname] = args[i]
 		end
-		local signal, value = execBlockStmts(fn.body, fnScope)
+		local signal, values = execBlockStmts(fn.body, fnScope)
 		if signal == "return" then
-			return State.wrapNil(value)
+			if #values == 0 then
+				return State.NULL
+			end
+			for i = 1, #values do
+				values[i] = State.wrapNil(values[i])
+			end
+			if #values == 1 then
+				return values[1]
+			end
+			return {
+				__multiReturn = true,
+				values = values
+			}
 		end
 		return State.NULL
 	end
@@ -130,7 +142,14 @@ execStmt = function(node, scope)
 	elseif kind == "Assign" then
 		local values = {}
 		for i, expr in ipairs(node.values) do
-			values[i] = evalExpr(expr, scope)
+			local result = evalExpr(expr, scope)
+			if i == #node.values and type(result) == "table" and result.__multiReturn then
+				for _, v in ipairs(result.values) do
+					table.insert(values, v)
+				end
+			else
+				table.insert(values, result)
+			end
 		end
 		for i, target in ipairs(node.targets) do
 			local value = values[i]
@@ -199,8 +218,18 @@ execStmt = function(node, scope)
 	elseif kind == "Continue" then
 		return "continue", nil
 	elseif kind == "Return" then
-		local value = node.value and evalExpr(node.value, scope) or nil
-		return "return", value
+		local values = {}
+		for i, expr in ipairs(node.values) do
+			local value = evalExpr(expr, scope)
+			if i == #node.values and type(value) == "table" and value.__multiReturn then
+				for _, v in ipairs(value.values) do
+					table.insert(values, v)
+				end
+			else
+				table.insert(values, value)
+			end
+		end
+		return "return", values
 	end
 	error("runeu: unknown statement '" .. tostring(kind) .. "'")
 end
@@ -281,13 +310,29 @@ evalExpr = function(node, scope)
 		error("runeu: " .. tostring(value))
 	elseif kind == "Call" then
 		local args = {}
-		for i, a in ipairs(node.args) do
-			args[i] = evalExpr(a, scope)
+
+		for i, expr in ipairs(node.args) do
+			if i == #node.args then
+				local value = evalExpr(expr, scope)
+
+				if type(value) == "table" and value.__multiReturn then
+					for _, v in ipairs(value.values) do
+						table.insert(args, v)
+					end
+				else
+					table.insert(args, value)
+				end
+			else
+				table.insert(args, evalExpr(expr, scope))
+			end
 		end
+
 		local callee = node.callee.type == "Identifier" and scopeGet(scope, node.callee.name) or evalExpr(node.callee, scope)
+
 		if callee == State.NULL then
 			error("runeu: attempt to call nil value")
 		end
+
 		return callFunction(callee, args, scope)
 	end
 	error("runeu: unknown expression '" .. tostring(kind) .. "'")
