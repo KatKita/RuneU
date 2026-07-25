@@ -248,7 +248,15 @@ parseStatement = function(p)
 		expect(p, "OP", ")")
 		local body = parseBlock(p, { ["end"] = true })
 		expect(p, "KEYWORD", "end")
-		return { type = "Assign", target = { type = "Identifier", name = name }, value = { type = "Function", params = params, body = body } }
+		return {
+			type = "Assign",
+			targets = {
+				{ type = "Identifier", name = name }
+			},
+			values = {
+				{ type = "Function", params = params, body = body }
+			}
+		}
 	end
 	if t.type == "KEYWORD" and t.value == "if" then
 		advance(p)
@@ -299,8 +307,23 @@ parseStatement = function(p)
 	if t.type == "KEYWORD" and t.value == "return" then
 		advance(p)
 		local nt = peek(p)
-		local hasValue = not (nt.type == "EOF" or (nt.type == "KEYWORD" and (nt.value == "end" or nt.value == "else" or nt.value == "elseif")))
-		return { type = "Return", value = hasValue and parseExpr(p) or nil }
+		local values = {}
+		local hasValue = not (
+			nt.type == "EOF"
+				or (nt.type == "KEYWORD"
+					and (nt.value == "end" or nt.value == "else" or nt.value == "elseif"))
+		)
+		if hasValue then
+			table.insert(values, parseExpr(p))
+			while check(p, "OP", ",") do
+				advance(p)
+				table.insert(values, parseExpr(p))
+			end
+		end
+		return {
+			type = "Return",
+			values = values,
+		}
 	end
 	local expr = parsePostfix(p)
 	if check(p, "OP", ",") or check(p, "OP", "=") then
