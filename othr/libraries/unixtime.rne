@@ -1,0 +1,41 @@
+unixtime = createlibrary("unixtime")
+
+unixtime.format = func(unixTime)
+	dateTable = os.date("!*t", unixTime)
+
+	return string.format("%04d-%02d-%02d %02d:%02d:%02d",
+		dateTable.year,
+		dateTable.month,
+		dateTable.day,
+		dateTable.hour,
+		dateTable.min,
+		dateTable.sec
+	)
+end
+
+unixtime.now = func()
+	return os.time()
+end
+
+unixtime.get = func(unixTime)
+	return os.date("!*t", unixTime)
+end
+
+unixtime.parse = func(year, month, day, hour, min, sec)
+	return os.time({
+		year = year,
+		month = month,
+		day = day,
+		hour = hour or 0,
+		min = min or 0,
+		sec = sec or 0
+	})
+end
+
+unixtime.utc = func(unixTime)
+	return os.date("!*t", unixTime)
+end
+
+unixtime.local = func(unixTime)
+	return os.date("*t", unixTime)
+end
