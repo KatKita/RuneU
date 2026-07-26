@@ -287,18 +287,27 @@ parseStatement = function(p)
 		advance(p)
 		local var = expect(p, "IDENT").value
 		expect(p, "OP", "=")
-		local startExpr = parseExpr(p)
+		local startExpr = parseAdd(p)
 		expect(p, "OP", ",")
-		local stopExpr = parseExpr(p)
+		local stopExpr = parseAdd(p)
 		local stepExpr = nil
 		if check(p, "OP", ",") then
 			advance(p)
-			stepExpr = parseExpr(p)
+			stepExpr = parseAdd(p)
 		end
-		if check(p, "KEYWORD", "do") then advance(p) end
+		if check(p, "KEYWORD", "do") then
+			advance(p)
+		end
 		local body = parseBlock(p, { ["end"] = true })
 		expect(p, "KEYWORD", "end")
-		return { type = "For", var = var, startExpr = startExpr, stopExpr = stopExpr, stepExpr = stepExpr, body = body }
+		return {
+			type = "For",
+			var = var,
+			startExpr = startExpr,
+			stopExpr = stopExpr,
+			stepExpr = stepExpr,
+			body = body
+		}
 	end
 	if t.type == "KEYWORD" and t.value == "break" then
 		advance(p)
