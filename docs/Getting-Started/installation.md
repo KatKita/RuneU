@@ -16,6 +16,11 @@ Before running the installer, enable **Allow HTTP Requests**:
 
 > The installer downloads the latest RuneU files directly from the official GitHub repository. If you prefer, you can inspect the script yourself or manually recreate the folder structure using the repository files.
 
+> 
+
+> When launching the installer, RobloxStudio may display the warning "Dangerous Command Detected
+This command uses HttService and may not be undoable. Would you like to continue?" 
+
 ## 3. Run the Installer
 
 Paste the following script into the **Command Bar** and press **Run**.
