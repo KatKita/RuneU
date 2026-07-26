@@ -93,15 +93,19 @@ local function binaryOp(op, a, b)
 end
 
 local function length(value)
-	if type(value) == "string" then
-		return #value
-	end
 	if type(value) == "table" then
+		local custom = value.__len
+		if custom then
+			return callFunction(custom, {value})
+		end
 		local count = 0
 		for _ in pairs(value) do
 			count += 1
 		end
 		return count
+	end
+	if type(value) == "string" then
+		return #value
 	end
 	return 0
 end
