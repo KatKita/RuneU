@@ -92,6 +92,20 @@ local function binaryOp(op, a, b)
 	return State.NULL
 end
 
+local function length(value)
+	if type(value) == "string" then
+		return #value
+	end
+	if type(value) == "table" then
+		local count = 0
+		for _ in pairs(value) do
+			count += 1
+		end
+		return count
+	end
+	return 0
+end
+
 callFunction = function(fn, args, scope)
 	if scope then
 		checkNotStopped(scope)
@@ -246,8 +260,7 @@ evalExpr = function(node, scope)
 		if node.op == "-" then return -(tonumber(v) or 0) end
 		if node.op == "not" then return not State.toBool(v) end
 		if node.op == "#" then
-			if type(v) == "string" or type(v) == "table" then return #v end
-			return 0
+			return length(v)
 		end
 		return State.NULL
 	elseif kind == "Binary" then
