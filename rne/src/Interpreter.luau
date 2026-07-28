@@ -1,9 +1,6 @@
 local State = require(script.Parent.State)
-
 local Interpreter = {}
-
 local evalExpr, execStmt, execBlockStmts, callFunction
-
 local function newScope(parent)
 	return {
 		vars = {},
@@ -12,13 +9,11 @@ local function newScope(parent)
 		global = parent and parent.global or nil
 	}
 end
-
 local function checkNotStopped(scope)
 	if State.isProcessStopped(scope) then
 		error("runeu: process stopped", 0)
 	end
 end
-
 local function scopeGet(scope, name)
 	if name == "global" then
 		return scope.global
@@ -31,7 +26,6 @@ local function scopeGet(scope, name)
 		end
 		s = s.parent
 	end
-
 	local process = scope.process
 	if process and process.context then
 		local value = process.context[name]
@@ -39,20 +33,16 @@ local function scopeGet(scope, name)
 			return value
 		end
 	end
-
 	local b = State.Builtins[name]
 	if b ~= nil then
 		return b
 	end
-
 	local lib = State.Libraries[name]
 	if lib ~= nil then
 		return lib
 	end
-
 	return State.NULL
 end
-
 -- rnesandbox: assignments that would create/overwrite a name at the root
 -- (global) scope are checked against State.isProtected. Locals inside
 -- functions/blocks are never restricted.
@@ -73,7 +63,6 @@ local function scopeSet(scope, name, value)
 	end
 	scope.vars[name] = value
 end
-
 local function binaryOp(op, a, b)
 	if op == "+" then return (tonumber(a) or 0) + (tonumber(b) or 0)
 	elseif op == "-" then return (tonumber(a) or 0) - (tonumber(b) or 0)
@@ -84,6 +73,7 @@ local function binaryOp(op, a, b)
 	elseif op == ".." then return State.toConcatString(a) .. State.toConcatString(b)
 	elseif op == "==" then return a == b
 	elseif op == "!=" then return a ~= b
+	elseif op == "~=" then return a ~= b
 	elseif op == "<" then return a < b
 	elseif op == ">" then return a > b
 	elseif op == "<=" then return a <= b
@@ -91,7 +81,6 @@ local function binaryOp(op, a, b)
 	end
 	return State.NULL
 end
-
 local function length(value)
 	if type(value) == "table" then
 		local custom = value.__len
@@ -109,7 +98,6 @@ local function length(value)
 	end
 	return 0
 end
-
 callFunction = function(fn, args, scope)
 	if scope then
 		checkNotStopped(scope)
@@ -142,7 +130,6 @@ callFunction = function(fn, args, scope)
 	end
 	error("runeu: attempt to call a non-function value")
 end
-
 execBlockStmts = function(stmts, scope)
 	for _, st in ipairs(stmts) do
 		local signal, value = execStmt(st, scope)
@@ -150,7 +137,6 @@ execBlockStmts = function(stmts, scope)
 	end
 	return nil, nil
 end
-
 execStmt = function(node, scope)
 	checkNotStopped(scope)
 	local kind = node.type
@@ -251,7 +237,6 @@ execStmt = function(node, scope)
 	end
 	error("runeu: unknown statement '" .. tostring(kind) .. "'")
 end
-
 evalExpr = function(node, scope)
 	local kind = node.type
 	if kind == "Number" then return node.value
@@ -327,7 +312,6 @@ evalExpr = function(node, scope)
 		error("runeu: " .. tostring(value))
 	elseif kind == "Call" then
 		local args = {}
-
 		for i, expr in ipairs(node.args) do
 			if i == #node.args then
 				local value = evalExpr(expr, scope)
@@ -343,18 +327,14 @@ evalExpr = function(node, scope)
 				table.insert(args, evalExpr(expr, scope))
 			end
 		end
-
 		local callee = node.callee.type == "Identifier" and scopeGet(scope, node.callee.name) or evalExpr(node.callee, scope)
-
 		if callee == State.NULL then
 			error("runeu: attempt to call nil value")
 		end
-
 		return callFunction(callee, args, scope)
 	end
 	error("runeu: unknown expression '" .. tostring(kind) .. "'")
 end
-
 Interpreter.newScope = newScope
 Interpreter.scopeGet = scopeGet
 Interpreter.scopeSet = scopeSet
@@ -362,5 +342,4 @@ Interpreter.evalExpr = evalExpr
 Interpreter.execStmt = execStmt
 Interpreter.execBlockStmts = execBlockStmts
 Interpreter.callFunction = callFunction
-
 return Interpreter
