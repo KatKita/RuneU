@@ -6,10 +6,31 @@ local Interpreter = require(script.Parent.Interpreter)
 
 local RuneFuncs = {}
 
+local function tableToString(value, visited)
+	visited = visited or {}
+	if type(value) ~= "table" then
+		return tostring(value)
+	end
+	if visited[value] then
+		return "<recursive>"
+	end
+	visited[value] = true
+	local parts = {}
+	for k, v in pairs(value) do
+		table.insert(parts, "[" .. tableToString(k, visited) .. "] = " .. tableToString(v, visited))
+	end
+	visited[value] = nil
+	return "{ " .. table.concat(parts, ", ") .. " }"
+end
+
 local function builtinPrint(...)
 	local parts = {}
 	for _, v in ipairs({ ... }) do
-		table.insert(parts, State.toDisplay(v))
+		if type(v) == "table" then
+			table.insert(parts, tableToString(v))
+		else
+			table.insert(parts, State.toDisplay(v))
+		end
 	end
 	print(table.concat(parts, "\t"))
 	return State.NULL
@@ -18,7 +39,11 @@ end
 local function builtinWarn(...)
 	local parts = {}
 	for _, v in ipairs({ ... }) do
-		table.insert(parts, State.toDisplay(v))
+		if type(v) == "table" then
+			table.insert(parts, tableToString(v))
+		else
+			table.insert(parts, State.toDisplay(v))
+		end
 	end
 	warn(table.concat(parts, "\t"))
 	return State.NULL
@@ -29,11 +54,9 @@ local function builtinCreateLibrary(name)
 		warn("runeu: library '" .. tostring(name) .. "' already exists")
 		return State.Libraries[name]
 	end
-
 	local lib = {}
 	State.Libraries[name] = lib
 	State.Builtins[name] = lib
-
 	return lib
 end
 
@@ -48,11 +71,6 @@ RuneFuncs.getlibrary = builtinGetLibrary
 
 RuneFuncs.newlib = builtinCreateLibrary
 RuneFuncs.getlib = builtinGetLibrary
-
---[[
-Rune.RuneFuncs.dolib = builtinCreateLibrary
-Rune.RuneFuncs.lib = builtinGetLibrary
-]]
 
 RuneFuncs.type = function(v)
 	if v == State.NULL then return "null" end
@@ -81,7 +99,7 @@ RuneFuncs.getmeta = getmetatable
 RuneFuncs.setmeta = setmetatable
 
 RuneFuncs.tick = function()
-	return os.clock()
+	return tick()
 end
 
 RuneFuncs.wait = function(seconds)
@@ -128,7 +146,7 @@ RuneFuncs.os = {
 
 RuneFuncs.co = coroutine
 RuneFuncs.bit32 = bit32
-RuneFuncs.luaversion = _VERSION
+RuneFuncs.luaversion = _VERSION 
 RuneFuncs.runeversion = State.VERSION -- old name for RuneU/runeu (idk there are any scripts that use this anymore, but I'll include it anyway just in case)
 RuneFuncs.runeuversion = State.VERSION
 RuneFuncs.isdevbuild = State.DEV_BUILD -- debug feature (so yeah ignore this)
