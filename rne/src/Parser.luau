@@ -177,7 +177,7 @@ end
 
 parseCompare = function(p)
 	local left = parseConcat(p)
-	while check(p, "OP", "==") or check(p, "OP", "!=") or check(p, "OP", "<") or check(p, "OP", ">") or check(p, "OP", "<=") or check(p, "OP", ">=") do
+	while check(p, "OP", "==") or check(p, "OP", "!=") or check(p, "OP", "~=") or check(p, "OP", "<") or check(p, "OP", ">") or check(p, "OP", "<=") or check(p, "OP", ">=") do
 		local op = advance(p).value
 		left = { type = "Binary", op = op, left = left, right = parseConcat(p) }
 	end
@@ -300,6 +300,7 @@ parseStatement = function(p)
 		end
 		local body = parseBlock(p, { ["end"] = true })
 		expect(p, "KEYWORD", "end")
+
 		return {
 			type = "For",
 			var = var,
