@@ -8,6 +8,7 @@ These are available globally inside any RuneU script, without needing `getlibrar
 |---|---|
 | `print(...)` | Prints values, tab-separated |
 | `warn(...)` | Same as `print`, but as a warning |
+| `err(...)` / `error(...)` | Stops the process with an error |
 
 ## Types
 
@@ -56,7 +57,7 @@ These are available globally inside any RuneU script, without needing `getlibrar
 
 `assert`, `err`/`error`, `co` (coroutine), `bit32`, `os` (`clock`, `date`, `difftime`, `time`), `utf8`, `raweq`, `rawread`, `rawwrite`, `getmeta`, `setmeta`, `pick` (`select`), `spread` (`table.unpack`).
 
-> Note: `_G` is intentionally **not** exposed, for sandboxing/security reasons.
+> Note: RuneU does not expose Luau’s _G table to maintain sandbox isolation. Instead, use global, which provides the equivalent functionality within RuneU.
 
 ## Next
 
