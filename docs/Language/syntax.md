@@ -69,7 +69,7 @@ print(t[10])
 | Category   | Operators                     |
 |------------|--------------------------------|
 | Math       | `+ - * / % ^`                  |
-| Comparison | `== != < > <= >=`             |
+| Comparison | `== != ~= < > <= >=`             |
 | Logic      | `and or not`                   |
 | Concat     | `..`                            |
 | Length     | `#t`                            |
