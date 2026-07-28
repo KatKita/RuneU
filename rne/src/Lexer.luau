@@ -42,6 +42,7 @@ function Lexer.lex(src)
 			i = j + 1
 		elseif c == "=" and src:sub(i + 1, i + 1) == "=" then push("OP", "=="); i = i + 2
 		elseif c == "!" and src:sub(i + 1, i + 1) == "=" then push("OP", "!="); i = i + 2
+		elseif c == "~" and src:sub(i + 1, i + 1) == "=" then push("OP", "~="); i = i + 2
 		elseif c == "<" and src:sub(i + 1, i + 1) == "=" then push("OP", "<="); i = i + 2
 		elseif c == ">" and src:sub(i + 1, i + 1) == "=" then push("OP", ">="); i = i + 2
 		elseif c == "." and src:sub(i + 1, i + 1) == "." then push("OP", ".."); i = i + 2
