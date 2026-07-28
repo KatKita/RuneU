@@ -3,7 +3,7 @@
 RuneU ships four built-in libraries, accessible from scripts via `getlibrary("name")`.
 
 ```
-m = getlibrary("math")
+m = math or getlibrary("math")
 print(m.lerp(0, 10, 0.5))
 ```
 
