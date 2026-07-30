@@ -34,6 +34,7 @@ local REPO = "RuneU"
 local BRANCH = "main"
 local ROOT = "rne"
 
+
 local API = ("https://api.github.com/repos/%s/%s/contents"):format(OWNER, REPO)
 local RAW = ("https://raw.githubusercontent.com/%s/%s/%s"):format(OWNER, REPO, BRANCH)
 
@@ -95,6 +96,14 @@ local RuneUInstaller = create("ScreenGui", {
 	ResetOnSpawn = false
 }, parentGui)
 
+local background = create("Frame", {
+	Name = "background",
+	BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+	BackgroundTransparency = 0.2,
+	BorderSizePixel = 0,
+	Size = UDim2.new(1, 0, 1, 0)
+}, RuneUInstaller)
+
 local main = create("Frame", {
 	Name = "main",
 	AnchorPoint = Vector2.new(0.5, 0.5),
@@ -102,7 +111,7 @@ local main = create("Frame", {
 	BorderColor3 = COLORS.border,
 	Position = UDim2.new(0.5, 0, 0.5, 0),
 	Size = UDim2.new(0, 548, 0, 311)
-}, RuneUInstaller)
+}, background)
 
 create("UIListLayout", { SortOrder = Enum.SortOrder.LayoutOrder }, main)
 
@@ -335,83 +344,81 @@ end
 
 local function startInstallation()
 	showScreen(loadingScreen)
-	loadingHeader.Text = "Connecting to GitHub..."
-	setProgress(0, "0%")
-
 	task.spawn(function()
 		local ok, err = pcall(function()
-			loadingHeader.Text = "Checking version..."
-			local version = GetVersion()
-
-			local RootFolder = Instance.new("Folder")
-			RootFolder.Name = "RuneU-" .. version
-
 			loadingHeader.Text = "Indexing files..."
-			local allFiles = collectAllFiles(ROOT)
-			local totalFiles = #allFiles
+			local files = collectAllFiles(ROOT)
+			local total, done = #files, 0
+			local source = Get(RAW .. "/rne/src/State.luau")
+			local version = source:match('VERSION%s*=%s*["\']([^"\']+)') or "Unknown"
+
+			local root = Instance.new("Folder")
+			root.Name = "RuneU-" .. version
+
+			local cache = {[ROOT] = root}
+			local function folder(path)
+				if cache[path] then return cache[path] end
+				local parent, name = path:match("^(.*)/([^/]+)$")
+				local f = Instance.new("Folder")
+				f.Name, f.Parent = name, folder(parent)
+				cache[path] = f
+				return f
+			end
 
 			loadingHeader.Text = "Downloading files..."
-			local folderCache = { [ROOT] = RootFolder }
+			local nextFile, workers = 1, math.min(6, total)
 
-			local function getOrCreateFolder(dirPath)
-				if folderCache[dirPath] then return folderCache[dirPath] end
-				local parts = string.split(dirPath, "/")
-				local currentParent = RootFolder
-				local currentPath = ROOT
+			local function download()
+				while true do
+					local i = nextFile
+					nextFile += 1
+					local item = files[i]
+					if not item then return end
 
-				for i = 2, #parts do
-					currentPath = currentPath .. "/" .. parts[i]
-					if not folderCache[currentPath] then
-						local newFolder = Instance.new("Folder")
-						newFolder.Name = parts[i]
-						newFolder.Parent = currentParent
-						folderCache[currentPath] = newFolder
+					local parent = folder(item.path:match("^(.*)/[^/]+$") or ROOT)
+					local value = Get(item.download_url)
+					local ext = item.name:match("%.([^.]+)$")
+					local obj
+
+					if ext == "lua" or ext == "luau" then
+						obj = Instance.new("ModuleScript")
+						obj.Name = item.name:gsub("%.luau?$", "")
+						obj.Source = value
+					else
+						obj = Instance.new("StringValue")
+						obj.Name, obj.Value = item.name, value
 					end
-					currentParent = folderCache[currentPath]
+
+					obj.Parent = parent
+					done += 1
+
+					local p = math.floor(done / total * 100)
+					setProgress(p, ("%d%% (%d/%d)"):format(p, done, total))
 				end
-				return currentParent
 			end
 
-			for index, item in ipairs(allFiles) do
-				local dirPath = item.path:match("^(.*)/[^/]+$") or ROOT
-				local parentFolder = getOrCreateFolder(dirPath)
-
-				local ext = item.name:match("%.([^.]+)$")
-				if ext == "lua" or ext == "luau" then
-					local module = Instance.new("ModuleScript")
-					module.Name = item.name:gsub("%.luau?$", "")
-					module.Source = Get(item.download_url)
-					module.Parent = parentFolder
-				else
-					local value = Instance.new("StringValue")
-					value.Name = item.name
-					value.Value = Get(item.download_url)
-					value.Parent = parentFolder
-				end
-
-				local percent = math.floor((index / totalFiles) * 100)
-				setProgress(percent, string.format("%d%% (%d/%d)", percent, index, totalFiles))
-				task.wait(0.02)
+			local finished = 0
+			for _ = 1, workers do
+				task.spawn(function()
+					download()
+					finished += 1
+				end)
 			end
+			repeat task.wait() until finished == workers
 
-			RootFolder.Parent = ReplicatedStorage
-			print("RuneU installed successfully:", RootFolder:GetFullName())
+			root.Parent = ReplicatedStorage
+			loadingHeader.Text = "Installation Complete!"
+			setProgress(100, "100%")
+			task.wait(0.5)
+			RuneUInstaller:Destroy()
 		end)
 
 		if not ok then
-			warn("RuneU Installer: " .. tostring(err))
 			errorHeader.Text = "Error: " .. tostring(err)
 			showScreen(errorScreen)
-		else
-			loadingHeader.Text = "Installation Complete!"
-			setProgress(100, "100%")
-			task.wait(1.5)
-			RuneUInstaller:Destroy()
 		end
 	end)
 end
-
-
 
 btnCancel.MouseButton1Click:Connect(function()
 	RuneUInstaller:Destroy()
