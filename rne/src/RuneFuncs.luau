@@ -121,15 +121,18 @@ end
 RuneFuncs.utf8 = utf8
 
 RuneFuncs.runne = function(fn, ...)
-	return task.spawn(fn, ...)
+	local args = { ... }
+	return task.spawn(Interpreter.callFunction, fn, args)
 end
 
 RuneFuncs.rundefer = function(fn, ...)
-	return task.defer(fn, ...)
+	local args = { ... }
+	return task.defer(function() Interpreter.callFunction(fn, args) end)
 end
 
 RuneFuncs.rundelay = function(seconds, fn, ...)
-	return task.delay(seconds, fn, ...)
+	local args = { ... }
+	return task.delay(seconds, function() Interpreter.callFunction(fn, args) end)
 end
 
 RuneFuncs.runcancel = function(thread)
