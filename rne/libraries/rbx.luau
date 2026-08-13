@@ -84,15 +84,15 @@ return function(rune)
 		hasTag = function(self, tag)
 			return self:HasTag(tag)
 		end,
-		
+
 		setTag = function(self, tag)
 			self:AddTag(tag)
 		end,
-		
+
 		removeTag = function(self, tag)
 			self:RemoveTag(tag)
 		end,
-		
+
 		getTags = function(self)
 			return self:GetTags()
 		end,
@@ -122,6 +122,10 @@ return function(rune)
 		isConnected = function(connection)
 			return connection.Connected
 		end,
+		
+		isDisconnected = function(connection)
+			return not connection.Connected
+		end,
 
 		Vector2 = Vector2.new,
 		Vector3 = Vector3.new,
@@ -148,6 +152,7 @@ return function(rune)
 
 		game = game,
 		workspace = workspace,
+		Workspace = Workspace,
 
 		Players = Players,
 		RunService = RunService,
@@ -162,5 +167,6 @@ return function(rune)
 		StarterPlayer = StarterPlayer,
 		StarterCharacterScripts = StarterPlayer.StarterCharacterScripts,
 		StarterPlayerScripts = StarterPlayer.StarterPlayerScripts,
+		StarterCharacter = task.spawn(pcall(function() return StarterPlayer:WaitForChild("StarterCharacter") end) or nil),
 	})
 end
