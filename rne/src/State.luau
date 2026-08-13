@@ -1,6 +1,9 @@
 local State = {}
 
-State.VERSION = "1.2.5"
+State.VERSION = "1.2.6"
+State.BETA = false
+State.BETAA = true
+State.State = State
 State.NULL = setmetatable({}, { __tostring = function() return "null" end })
 State.ENV = "OTHER"
 State.DEV_BUILD = false
